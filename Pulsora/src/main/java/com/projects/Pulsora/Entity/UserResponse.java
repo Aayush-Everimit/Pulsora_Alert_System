@@ -4,27 +4,32 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.security.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-public class UserResponse
-{
+public class UserResponse {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true, nullable=false)
+
+    @Column(nullable = false)
     private String userName;
-    @Column
+
+    @Column(nullable = false)
     private String disasterEvent;
-    public enum responseType
-    {
-        Felt,
-        Not_Felt,
-        No_Response
+    public enum ResponseType {
+        FELT,
+        NOT_FELT,
+        NO_RESPONSE
     }
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ResponseType response;
+
     @Column(name = "response_time")
-    private Timestamp responseTime;
+    private LocalDateTime responseTime;
+
 }

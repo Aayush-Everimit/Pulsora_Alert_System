@@ -1,6 +1,6 @@
 package com.projects.Pulsora.Repository;
 
-import com.projects.Pulsora.Entity.Notification;
+import com.projects.Pulsora.Entity.Users;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,24 +11,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class notificationRepo implements notificationRepository {
+public class UsersRepositoryImpl implements UsersRepository {
     @Override
     public void flush() {
 
     }
 
     @Override
-    public <S extends Notification> S saveAndFlush(S entity) {
+    public <S extends Users> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Notification> List<S> saveAllAndFlush(Iterable<S> entities) {
+    public <S extends Users> List<S> saveAllAndFlush(Iterable<S> entities) {
         return List.of();
     }
 
     @Override
-    public void deleteAllInBatch(Iterable<Notification> entities) {
+    public void deleteAllInBatch(Iterable<Users> entities) {
 
     }
 
@@ -43,67 +43,67 @@ public class notificationRepo implements notificationRepository {
     }
 
     @Override
-    public Notification getOne(Long aLong) {
+    public Users getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public Notification getById(Long aLong) {
+    public Users getById(Long aLong) {
         return null;
     }
 
     @Override
-    public Notification getReferenceById(Long aLong) {
+    public Users getReferenceById(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Notification> Optional<S> findOne(Example<S> example) {
+    public <S extends Users> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Notification> List<S> findAll(Example<S> example) {
+    public <S extends Users> List<S> findAll(Example<S> example) {
         return List.of();
     }
 
     @Override
-    public <S extends Notification> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Users> List<S> findAll(Example<S> example, Sort sort) {
         return List.of();
     }
 
     @Override
-    public <S extends Notification> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Users> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Notification> long count(Example<S> example) {
+    public <S extends Users> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Notification> boolean exists(Example<S> example) {
+    public <S extends Users> boolean exists(Example<S> example) {
         return false;
     }
 
     @Override
-    public <S extends Notification, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends Users, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
 
     @Override
-    public <S extends Notification> S save(S entity) {
+    public <S extends Users> S save(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Notification> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Users> List<S> saveAll(Iterable<S> entities) {
         return List.of();
     }
 
     @Override
-    public Optional<Notification> findById(Long aLong) {
+    public Optional<Users> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -113,12 +113,12 @@ public class notificationRepo implements notificationRepository {
     }
 
     @Override
-    public List<Notification> findAll() {
+    public List<Users> findAll() {
         return List.of();
     }
 
     @Override
-    public List<Notification> findAllById(Iterable<Long> longs) {
+    public List<Users> findAllById(Iterable<Long> longs) {
         return List.of();
     }
 
@@ -133,7 +133,7 @@ public class notificationRepo implements notificationRepository {
     }
 
     @Override
-    public void delete(Notification entity) {
+    public void delete(Users entity) {
 
     }
 
@@ -143,7 +143,7 @@ public class notificationRepo implements notificationRepository {
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Notification> entities) {
+    public void deleteAll(Iterable<? extends Users> entities) {
 
     }
 
@@ -153,12 +153,12 @@ public class notificationRepo implements notificationRepository {
     }
 
     @Override
-    public List<Notification> findAll(Sort sort) {
+    public List<Users> findAll(Sort sort) {
         return List.of();
     }
 
     @Override
-    public Page<Notification> findAll(Pageable pageable) {
+    public Page<Users> findAll(Pageable pageable) {
         return null;
     }
 }

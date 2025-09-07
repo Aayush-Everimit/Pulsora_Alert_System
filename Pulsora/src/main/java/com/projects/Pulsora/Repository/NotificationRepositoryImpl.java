@@ -1,6 +1,6 @@
 package com.projects.Pulsora.Repository;
 
-import com.projects.Pulsora.Entity.Users;
+import com.projects.Pulsora.Entity.Notification;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,24 +11,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class userRepo implements userRepository{
+public class NotificationRepositoryImpl implements NotificationRepository {
     @Override
     public void flush() {
 
     }
 
     @Override
-    public <S extends Users> S saveAndFlush(S entity) {
+    public <S extends Notification> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Users> List<S> saveAllAndFlush(Iterable<S> entities) {
+    public <S extends Notification> List<S> saveAllAndFlush(Iterable<S> entities) {
         return List.of();
     }
 
     @Override
-    public void deleteAllInBatch(Iterable<Users> entities) {
+    public void deleteAllInBatch(Iterable<Notification> entities) {
 
     }
 
@@ -43,67 +43,67 @@ public class userRepo implements userRepository{
     }
 
     @Override
-    public Users getOne(Long aLong) {
+    public Notification getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public Users getById(Long aLong) {
+    public Notification getById(Long aLong) {
         return null;
     }
 
     @Override
-    public Users getReferenceById(Long aLong) {
+    public Notification getReferenceById(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Users> Optional<S> findOne(Example<S> example) {
+    public <S extends Notification> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Users> List<S> findAll(Example<S> example) {
+    public <S extends Notification> List<S> findAll(Example<S> example) {
         return List.of();
     }
 
     @Override
-    public <S extends Users> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Notification> List<S> findAll(Example<S> example, Sort sort) {
         return List.of();
     }
 
     @Override
-    public <S extends Users> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Notification> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Users> long count(Example<S> example) {
+    public <S extends Notification> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Users> boolean exists(Example<S> example) {
+    public <S extends Notification> boolean exists(Example<S> example) {
         return false;
     }
 
     @Override
-    public <S extends Users, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends Notification, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
 
     @Override
-    public <S extends Users> S save(S entity) {
+    public <S extends Notification> S save(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Users> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Notification> List<S> saveAll(Iterable<S> entities) {
         return List.of();
     }
 
     @Override
-    public Optional<Users> findById(Long aLong) {
+    public Optional<Notification> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -113,12 +113,12 @@ public class userRepo implements userRepository{
     }
 
     @Override
-    public List<Users> findAll() {
+    public List<Notification> findAll() {
         return List.of();
     }
 
     @Override
-    public List<Users> findAllById(Iterable<Long> longs) {
+    public List<Notification> findAllById(Iterable<Long> longs) {
         return List.of();
     }
 
@@ -133,7 +133,7 @@ public class userRepo implements userRepository{
     }
 
     @Override
-    public void delete(Users entity) {
+    public void delete(Notification entity) {
 
     }
 
@@ -143,7 +143,7 @@ public class userRepo implements userRepository{
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Users> entities) {
+    public void deleteAll(Iterable<? extends Notification> entities) {
 
     }
 
@@ -153,12 +153,12 @@ public class userRepo implements userRepository{
     }
 
     @Override
-    public List<Users> findAll(Sort sort) {
+    public List<Notification> findAll(Sort sort) {
         return List.of();
     }
 
     @Override
-    public Page<Users> findAll(Pageable pageable) {
+    public Page<Notification> findAll(Pageable pageable) {
         return null;
     }
 }

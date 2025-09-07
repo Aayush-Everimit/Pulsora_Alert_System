@@ -31,6 +31,8 @@ public class Users
         VOLUNTEER
     }
     @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private Role role;
     @Column(name = "registered_at")
     private LocalDateTime registerAt;
     @Column(name = "last_active_at")

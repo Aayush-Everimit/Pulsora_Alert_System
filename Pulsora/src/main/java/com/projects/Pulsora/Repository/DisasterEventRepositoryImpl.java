@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class disasterEventRepo implements disasterEventRepository {
+public class DisasterEventRepositoryImpl implements DisasterEventRepository {
     @Override
     public void flush() {
 
