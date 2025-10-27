@@ -1,5 +1,5 @@
 <mxfile host="app.diagrams.net" modified="2025-09-06T00:59:00.000Z" agent="Mozilla/5.0" etag="sqXs3RtHpYM1fA4kddHf" version="20.3.3" type="device">
-  <diagram id="PulsoraDisasterFlow" name="Disaster Notification Flow">
+  <diagram id="PulsoraDisasterFlow" name="Disaster Notifications Flow">
     <mxGraphModel dx="1000" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
@@ -20,8 +20,8 @@
           <mxGeometry x="220" y="220" width="160" height="60" as="geometry"/>
         </mxCell>
         
-        <!-- Initial Notification -->
-        <mxCell id="5" value="Notification: 'Did you feel it?'" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#e0e7ff;strokeColor=#4338ca;fontSize=14;fontColor=#3730a3;" vertex="1" parent="1">
+        <!-- Initial Notifications -->
+        <mxCell id="5" value="Notifications: 'Did you feel it?'" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#e0e7ff;strokeColor=#4338ca;fontSize=14;fontColor=#3730a3;" vertex="1" parent="1">
           <mxGeometry x="220" y="310" width="160" height="60" as="geometry"/>
         </mxCell>
         

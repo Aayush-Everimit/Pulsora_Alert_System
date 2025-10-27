@@ -2,6 +2,9 @@ package com.projects.Pulsora.Repository;
 
 import com.projects.Pulsora.Entity.DisasterEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface DisasterEventRepository extends JpaRepository<DisasterEvent,Long> {
+@Repository
+public interface DisasterEventRepository extends JpaRepository<DisasterEvent, Long>
+{
 }

@@ -15,8 +15,14 @@ public class UserResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String userName;
+
+    @ManyToOne
+    @JoinColumn(name = "users_id")
+    private Users users;
+
+    @ManyToOne
+    @JoinColumn(name = "disaster_event_id")
+    private DisasterEvent disasterEvent;
 
     @Column(nullable = false)
     private String disasterEvent;

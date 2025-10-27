@@ -3,8 +3,6 @@ package com.projects.Pulsora.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.print.attribute.standard.Severity;
 import java.time.LocalDateTime;
 
 @Getter
