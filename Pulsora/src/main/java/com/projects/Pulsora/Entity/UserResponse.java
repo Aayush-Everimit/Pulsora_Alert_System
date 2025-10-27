@@ -24,8 +24,6 @@ public class UserResponse {
     @JoinColumn(name = "disaster_event_id")
     private DisasterEvent disasterEvent;
 
-    @Column(nullable = false)
-    private String disasterEvent;
     public enum ResponseType {
         FELT,
         NOT_FELT,

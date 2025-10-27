@@ -18,9 +18,13 @@ import java.util.stream.Collectors;
 public class NotificationService
 {
     private final NotificationRepository notificationRepository;
+    private final UsersService usersService;
+    private final EmailService emailService;
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository, UsersService usersService, EmailService emailService) {
         this.notificationRepository = notificationRepository;
+        this.usersService = usersService;
+        this.emailService = emailService;
     }
 
     public Optional<Notifications> sendNotification(Notifications notification)
@@ -52,7 +56,7 @@ public class NotificationService
     }
 
     public void sendInitialNotificationToUsers(DisasterEvent savedEvent) {
-        List<Users> usersToNotify = UsersService.InProximity();
+        List<Users> usersToNotify = usersService.InProximity(savedEvent);
         String enumOptions = Arrays.stream(UserResponse.ResponseType.values())
                 .map(Enum::name)
                 .collect(Collectors.joining(", "));
@@ -67,6 +71,9 @@ public class NotificationService
                     savedEvent
             );
             notificationRepository.save(notif);
+            emailService.sendSimpleEmail(user.getEmail(),
+                    "Pulsora Disaster Alert: " + savedEvent.getEventType(),
+                    message);
         }
     }
 }

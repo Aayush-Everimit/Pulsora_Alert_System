@@ -1,5 +1,6 @@
 package com.projects.Pulsora.Service;
 
+import com.projects.Pulsora.Entity.DisasterEvent;
 import com.projects.Pulsora.Entity.Users;
 import com.projects.Pulsora.Repository.UsersRepository;
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,12 @@ public class UsersService
         this.usersRepository = usersRepository;
     }
 
-    public static List<Users> InProximity()
+    public List<Users> InProximity(DisasterEvent event)
     {
+        if(event == null || event.getLocation() == null || event.getLocation().isEmpty())
+            return List.of();
+        String eventLocation = event.getLocation().toLowerCase();
+        return usersRepository.findByLocationIgnoreCase(eventLocation);
     }
 
     public Optional<Users> findByEmail(String email) {
