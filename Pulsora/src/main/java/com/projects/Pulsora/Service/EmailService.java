@@ -1,6 +1,5 @@
 package com.projects.Pulsora.Service;
 
-import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ public class EmailService
     {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("brad.schneider24@ethereal.email");
+            message.setFrom("dileep.gautam@testdk.email");
             message.setTo(toEmail);
             message.setSubject(s);
             message.setText(body);
