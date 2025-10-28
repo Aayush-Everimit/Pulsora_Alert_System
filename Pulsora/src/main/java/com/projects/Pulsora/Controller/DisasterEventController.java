@@ -17,14 +17,12 @@ public class DisasterEventController
     {
         this.disasterEventService = disasterEventService;
     }
-    @PostMapping("/")
-    public ResponseEntity<DisasterEvent> create(@RequestBody DisasterEvent disasterEvent)
+    @PostMapping({"", "/"})    public ResponseEntity<DisasterEvent> create(@RequestBody DisasterEvent disasterEvent)
     {
         DisasterEvent created  = disasterEventService.createEventAndNotify(disasterEvent);
         return ResponseEntity.ok(created);
     }
-    @GetMapping("/")
-    public List<DisasterEvent> getAllEvents()
+    @GetMapping({"", "/"})    public List<DisasterEvent> getAllEvents()
     {
         return disasterEventService.getAllEvents();
     }
