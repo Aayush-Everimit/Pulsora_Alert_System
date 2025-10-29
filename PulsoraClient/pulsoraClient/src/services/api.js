@@ -1,5 +1,5 @@
 import axios from "axios";
-const ApiBaseUrl = "https://marquerite-unprotecting-amber.ngrok-free.dev";
+const ApiBaseUrl = "/api";
 const apiClient = axios.create({
   baseURL: ApiBaseUrl,
   headers: {
