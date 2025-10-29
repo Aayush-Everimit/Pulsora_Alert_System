@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # 1. POSTGRESQL DATABASE SERVICE (The permanent solution)
+  db:
+    image: postgres:15-alpine
+    container_name: pulsora_db
+    restart: always
+    environment:
+      # Use the credentials defined in your application.properties
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Aayush@2006
+      POSTGRES_DB: pulsora_db
+    ports:
+      - "5432:5432" # Allows optional access from your host, e.g., for pgAdmin
+    volumes:
+      - db_data:/var/lib/postgresql/data # Volume to persist data on your host machine
+
+  # 2. SPRING BOOT BACKEND SERVICE (Pulsora)
+  backend:
+    build:
+      context: ./Pulsora # Location of Pulsora/Dockerfile
+    container_name: pulsora_backend
+    ports:
+      - "8081:8081" # Expose backend API
+    depends_on:
+      - db # Ensures Postgres starts first
+    # Volumes are crucial for hot-reloading in development
+    volumes:
+      - ./Pulsora:/app        # Mounts source code for live changes/recompile
+      - ~/.m2:/root/.m2      # Caches Maven dependencies locally
+    # Runs the application, overriding default Dockerfile ENTRYPOINT
+    command: ./mvnw spring-boot:run
+
+  # 3. VITE/REACT FRONTEND SERVICE (PulsoraClient)
+  frontend:
+    build:
+      context: ./PulsoraClient # Location of PulsoraClient/Dockerfile
+    container_name: pulsora_frontend
+    ports:
+      - "5175:5175" # Expose Vite dev server
+    depends_on:
+      - backend
+    # Volumes for hot-reloading:
+    volumes:
+      - ./PulsoraClient:/app
+      - /app/node_modules # Avoids container's node_modules being overwritten by host
+
+### Define the Volumes
+volumes:
+  db_data: # Volume definition for PostgreSQL data persistence
