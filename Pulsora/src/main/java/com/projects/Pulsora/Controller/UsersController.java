@@ -3,6 +3,8 @@ package com.projects.Pulsora.Controller;
 import com.projects.Pulsora.Entity.Users;
 import com.projects.Pulsora.Service.UsersService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -11,9 +13,11 @@ import java.net.URI;
 public class UsersController
 {
     private final UsersService usersService;
+    private final AuthenticationManager authenticationManager;
 
-    public UsersController(UsersService usersService) {
+    public UsersController(UsersService usersService, AuthenticationManager authenticationManager) {
         this.usersService = usersService;
+        this.authenticationManager = authenticationManager;
     }
     @GetMapping("/email/{email}")
     public ResponseEntity<Users> getUserByEmail(@PathVariable String email)
@@ -29,10 +33,16 @@ public class UsersController
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping("/users")
-    public ResponseEntity<Users> createUser(@RequestBody Users user) {
+    public ResponseEntity<Users> signUp(@RequestBody Users user) {
         Users savedUser = usersService.createNewUser(user);
         URI location = URI.create("/users/" + savedUser.getId());
         return ResponseEntity.created(location).body(savedUser);
+    }
+
+    @GetMapping("/login")
+    public void login(@RequestBody Users user)
+    {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
     }
 
     @PutMapping("/users/{id}")
