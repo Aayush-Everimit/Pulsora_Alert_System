@@ -17,7 +17,7 @@ public class JwtUtil {
             "aVerySecureAndLongSecretKeyThatIsAtLeast32BytesLong";
 
     private static final long EXPIRATION_TIME =
-            1000 * 60 * 60; // 1 hour
+            1000 * 60 * 60;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(
@@ -25,7 +25,7 @@ public class JwtUtil {
         );
     }
 
-    // ✅ Generate token (EXPLICIT HS256)
+
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -37,12 +37,10 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ✅ Extract username
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // ✅ Validate token
     public boolean isTokenValid(String token, String username) {
         return extractUsername(token).equals(username)
                 && !isTokenExpired(token);
@@ -54,7 +52,6 @@ public class JwtUtil {
                 .before(new Date());
     }
 
-    // ✅ CORRECT parsing for jjwt 0.13.x
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())

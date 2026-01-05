@@ -41,7 +41,7 @@ public class NotificationService {
                     user.getUsername(), user.getEmail(), event.getEventType(), event.getSeverity(), LocalDateTime.now());
         }
 
-        log.info("✅ Notification-I successfully dispatched for event: {}", event.getId());
+        log.info("Notification-I successfully dispatched for event: {}", event.getId());
     }
 
     public void sendFinalNotificationAfterAIAnalysis(AIResponse aiResponse) {

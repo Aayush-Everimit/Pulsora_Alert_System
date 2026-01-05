@@ -19,13 +19,11 @@ public class UsersService implements UserDetailsService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // ✅ REGISTER
     public User registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return usersRepository.save(user);
     }
 
-    // ✅ USED BY SPRING SECURITY ONLY
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
@@ -41,7 +39,6 @@ public class UsersService implements UserDetailsService {
                 .build();
     }
 
-    // 🔹 BUSINESS METHODS
 
     public User findByEmailOrThrow(String email) {
         return usersRepository.findByEmail(email)
@@ -64,7 +61,7 @@ public class UsersService implements UserDetailsService {
         return usersRepository.findAll();
     }
 
-    // ✅ UPDATE PROFILE
+
     @Transactional
     public Optional<User> updateExistingUser(Long id, User updatedUser) {
 
@@ -92,7 +89,7 @@ public class UsersService implements UserDetailsService {
         });
     }
 
-    // ✅ DELETE USER
+
     public ResponseEntity<String> deleteUser(Long id) {
 
         if (!usersRepository.existsById(id)) {

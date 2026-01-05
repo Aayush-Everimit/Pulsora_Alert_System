@@ -47,18 +47,10 @@ public class DisasterEvent {
     @Column(name = "api_source", length = 255)
     private String apiSource;
 
-    /**
-     * ❌ Prevent infinite recursion
-     * DisasterEvent -> UserResponse -> DisasterEvent -> ...
-     */
     @OneToMany(mappedBy = "disasterEvent", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<UserResponse> userResponses;
 
-    /**
-     * ❌ Prevent infinite recursion
-     * DisasterEvent -> AIResponse -> DisasterEvent -> ...
-     */
     @OneToMany(mappedBy = "disasterEvent", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<AIResponse> aiResponses;

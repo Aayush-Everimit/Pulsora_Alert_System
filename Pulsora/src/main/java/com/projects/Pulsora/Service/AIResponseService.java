@@ -31,9 +31,6 @@ public class AIResponseService {
     private final NotificationService notificationService;
     private final GeminiClient geminiClient;
 
-    /* =========================
-       MAIN ENTRY POINT
-       ========================= */
 
     @Transactional
     public AIResponse_dto generatePersonalizedAIAnalysis(Long disasterEventId, Long userId) {
@@ -71,10 +68,6 @@ public class AIResponseService {
         return toDto(saved);
     }
 
-    /* =========================
-       EVENT LISTENER
-       ========================= */
-
     @Async
     @EventListener
     public void handleUserResponseSubmitted(UserResponseSubmittedEvent event) {
@@ -91,9 +84,6 @@ public class AIResponseService {
         }
     }
 
-    /* =========================
-       CREATE / UPDATE SAFELY
-       ========================= */
 
     private AIResponse getOrCreateAIResponse(User user, DisasterEvent event) {
         return aiResponseRepository
@@ -106,9 +96,6 @@ public class AIResponseService {
                 });
     }
 
-    /* =========================
-       PROMPT ENGINEERING
-       ========================= */
 
     private String buildPrompt(
             DisasterEvent event,
@@ -158,9 +145,6 @@ public class AIResponseService {
         );
     }
 
-    /* =========================
-       AI PARSING (CRITICAL)
-       ========================= */
 
     private ParsedAI parseAIResponse(String text) {
 
@@ -193,9 +177,6 @@ public class AIResponseService {
         return new ParsedAI(summary, actions);
     }
 
-    /* =========================
-       PUBLIC GETTERS
-       ========================= */
 
     public List<AIResponse> getResponsesByUserId(Long userId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -204,7 +185,7 @@ public class AIResponseService {
         if (principal instanceof org.springframework.security.core.userdetails.User) {
             email = ((org.springframework.security.core.userdetails.User) principal).getUsername();
         } else if (principal instanceof String) {
-            email = (String) principal; // sometimes JWT stores username directly
+            email = (String) principal;
         } else {
             throw new IllegalStateException("Unexpected authentication principal type: " + principal.getClass());
         }
@@ -222,9 +203,7 @@ public class AIResponseService {
         return aiResponseRepository.findByDisasterEventId(eventId);
     }
 
-    /* =========================
-       INTERNAL HELPERS
-       ========================= */
+
 
     private record ParsedAI(String summary, String actions) {}
 

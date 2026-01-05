@@ -30,7 +30,7 @@ public class UserResponseController {
         UserResponse_dto responseDto = new UserResponse_dto(
                 response.getUser().getId(),
                 response.getDisasterEvent().getId(),
-                response.getResponse(), // ✅ enum type matches DTO
+                response.getResponse(),
                 response.getDescription()
         );
 

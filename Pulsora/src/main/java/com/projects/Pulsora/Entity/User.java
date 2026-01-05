@@ -46,11 +46,10 @@ public class User implements UserDetails {
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
 
-    // One user can have many responses (user input)
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserResponse> userResponses;
 
-    // One user can have multiple AI outputs (AI-generated for that user)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AIResponse> aiResponses;
 

@@ -46,7 +46,7 @@ public class DisasterEventController {
     @GetMapping
     public ResponseEntity<List<DisasterEvent>> getAllDisasterEvents() {
         List<DisasterEvent> events = disasterEventService.getAllEvents();
-        return ResponseEntity.ok(events); // ✅ empty list is fine
+        return ResponseEntity.ok(events);
     }
 
 

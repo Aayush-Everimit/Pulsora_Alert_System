@@ -18,7 +18,7 @@ public class UserResponseService {
     private final UsersRepository userRepository;
     private final DisasterEventRepository disasterEventRepository;
     private final UserResponseRepository userResponseRepository;
-    private final ApplicationEventPublisher eventPublisher; // ✅ instead of AIResponseService
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public UserResponse submitResponse(Long userId, Long disasterEventId, UserResponse.ResponseType responseType, String description) {
@@ -44,7 +44,6 @@ public class UserResponseService {
                     return userResponseRepository.save(newResponse);
                 });
 
-        // ✅ Publish event (decoupled trigger)
         eventPublisher.publishEvent(new UserResponseSubmittedEvent(userId, disasterEventId));
 
         return savedResponse;
