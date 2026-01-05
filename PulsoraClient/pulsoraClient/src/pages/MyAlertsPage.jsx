@@ -15,16 +15,18 @@ function MyAlertsPage() {
             try {
                 setLoading(true);
 
+                // Fetch events, user responses, and AI responses
                 const [eventsRes, responsesRes, aiRes] = await Promise.all([
                     apiClient.get("/api/v1/disaster-events"),
                     apiClient.get("/api/v1/user-responses"),
-                    apiClient.get(`/api/v1/ai-responses/user/${userId}`)
+                    apiClient.get(`/api/v1/ai-responses/user/${userId}`),
                 ]);
 
                 const events = eventsRes.data || [];
                 const responses = responsesRes.data || [];
                 const aiResponses = aiRes.data || [];
 
+                // Combine data correctly
                 const combined = events.map((event) => {
                     const userResponse = responses.find(
                         (r) =>
@@ -32,8 +34,9 @@ function MyAlertsPage() {
                             r.disasterEvent?.id === event.id
                     );
 
+                    // ✅ Use eventId instead of disasterEvent.id
                     const aiResponse = aiResponses.find(
-                        (a) => a.disasterEvent?.id === event.id
+                        (a) => a.eventId === event.id
                     );
 
                     return {
@@ -58,12 +61,10 @@ function MyAlertsPage() {
         loadAlerts();
     }, [userId]);
 
-    // ✅ Handle user response (FELT / NOT_FELT)
-    // ✅ Submit user response
     const handleResponse = async (eventId, responseType) => {
         setRespondingId(eventId);
         try {
-            // Step 1️⃣ — Submit the user response
+            // Step 1️⃣ — Submit user response
             await apiClient.post("/api/v1/user-responses", {
                 userId: Number(userId),
                 disasterEventId: eventId,
@@ -71,22 +72,16 @@ function MyAlertsPage() {
                 description: "",
             });
 
-            // Step 2️⃣ — Poll for AI response (2 tries, 3-second interval)
-            let aiResponse = null;
-            for (let i = 0; i < 2; i++) {
-                const aiRes = await apiClient.get(`/api/v1/ai-responses/user/${userId}`);
-                const found = aiRes.data?.find(
-                    (r) => r.disasterEvent?.id === eventId
-                );
-                if (found) {
-                    aiResponse = found;
-                    break;
-                }
-                // Wait 3 seconds before next try
-                await new Promise((res) => setTimeout(res, 3000));
-            }
+            // Step 2️⃣ — Wait 5 seconds (allow Gemini + DB to complete)
+            await new Promise((res) => setTimeout(res, 5000));
 
-            // Step 3️⃣ — Update UI with response + AI data
+            // Step 3️⃣ — Fetch AI response (auto-generates if missing)
+            const aiRes = await apiClient.get(
+                `/api/v1/ai-responses/user/${userId}/event/${eventId}`
+            );
+            const aiResponse = aiRes.data || null;
+
+            // Step 4️⃣ — Update UI
             setAlerts((prev) =>
                 prev.map((a) =>
                     a.id === eventId
@@ -99,7 +94,7 @@ function MyAlertsPage() {
                 )
             );
         } catch (err) {
-            console.error("Failed to submit response:", err);
+            console.error("❌ Failed to submit or fetch AI response:", err);
             alert("Failed to submit response. Try again.");
         } finally {
             setRespondingId(null);
@@ -148,14 +143,18 @@ function MyAlertsPage() {
                                         disabled={respondingId === alert.id}
                                         className="px-5 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-500 transition disabled:opacity-50"
                                     >
-                                        {respondingId === alert.id ? "Submitting..." : "I FELT IT"}
+                                        {respondingId === alert.id
+                                            ? "Submitting..."
+                                            : "I FELT IT"}
                                     </button>
                                     <button
                                         onClick={() => handleResponse(alert.id, "NOT_FELT")}
                                         disabled={respondingId === alert.id}
                                         className="px-5 py-2 text-xs font-bold rounded-lg bg-slate-700 hover:bg-slate-600 transition disabled:opacity-50"
                                     >
-                                        {respondingId === alert.id ? "Submitting..." : "I DID NOT FEEL IT"}
+                                        {respondingId === alert.id
+                                            ? "Submitting..."
+                                            : "I DID NOT FEEL IT"}
                                     </button>
                                 </div>
                             </div>
@@ -166,7 +165,7 @@ function MyAlertsPage() {
                             <div className="mt-4">
                                 <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
                                     <Check size={16} /> Response acknowledged —{" "}
-                                    {alert.userResponse.responseType}
+                                    {alert.userResponse.response}
                                 </div>
 
                                 <div className="mt-2">
@@ -174,7 +173,8 @@ function MyAlertsPage() {
                                         AI Situation Summary
                                     </p>
                                     <p className="text-sm mt-1 text-gray-300">
-                                        {alert.aiResponse.aggregateSummary || "No summary available."}
+                                        {alert.aiResponse.aggregateSummary ||
+                                            "No summary available."}
                                     </p>
                                 </div>
 
@@ -183,7 +183,8 @@ function MyAlertsPage() {
                                         Recommended Action
                                     </p>
                                     <p className="text-sm mt-1 text-gray-300 whitespace-pre-line">
-                                        {alert.aiResponse.recommendedAction || "No recommendation yet."}
+                                        {alert.aiResponse.recommendedAction ||
+                                            "No recommendation yet."}
                                     </p>
                                 </div>
 

@@ -181,7 +181,6 @@ public class AIResponseService {
     public List<AIResponse> getResponsesByUserId(Long userId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email;
-
         if (principal instanceof org.springframework.security.core.userdetails.User) {
             email = ((org.springframework.security.core.userdetails.User) principal).getUsername();
         } else if (principal instanceof String) {
@@ -203,6 +202,20 @@ public class AIResponseService {
         return aiResponseRepository.findByDisasterEventId(eventId);
     }
 
+    public AIResponse_dto getOrGenerateResponse(Long userId, Long eventId)
+    {
+        User user = usersService.findById(userId).orElseThrow(() -> new RuntimeException("UserNotFound"));
+
+        DisasterEvent event = disasterEventService.getEventById(eventId).orElseThrow(() -> new RuntimeException("EventNotFound"));
+        Optional<AIResponse> existing = aiResponseRepository.findByUserAndDisasterEvent(user, event);
+
+        if(existing.isPresent()) {
+            return toDto(existing.get());
+        }
+        log.info("⚙️ No AI response yet for user {} and event {} — generating...", userId, eventId);
+        return generatePersonalizedAIAnalysis(eventId,userId);
+
+    }
 
 
     private record ParsedAI(String summary, String actions) {}
