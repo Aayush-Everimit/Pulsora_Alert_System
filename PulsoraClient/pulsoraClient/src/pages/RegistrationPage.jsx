@@ -1,229 +1,109 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { ShieldPlus, UserPlus, Mail, Lock, ChevronRight } from "lucide-react";
 
-// Placeholder Logo
-const PulsoraLogo = () => (
-  <div className="text-3xl font-bold text-white mb-8 flex items-center justify-center">
-    <svg
-      className="w-10 h-10 text-indigo-400 mr-2"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-    </svg>
-    Pulsora
-  </div>
-);
+export default function RegistrationPage() {
+    const { register } = useAuth();
+    const navigate = useNavigate();
 
-function RegistrationPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [location, setLocation] = useState(""); // Simple text for now
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+    // 🔐 LOGIC PRESERVED: Exactly as provided
+    const [form, setForm] = useState({
+        username: "",
+        email: "",
+        password: "",
+    });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords don't match!");
-      return;
-    }
-
-    const userData = {
-      username,
-      email,
-      password,
-      location,
-      role: "USER", // Default role
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await register(form.username, form.email, form.password);
+            alert("Registered successfully");
+            navigate("/login");
+        } catch {
+            alert("Registration failed");
+        }
     };
-    console.log("Registering:", userData);
 
-    // --- TODO: Implement registration API call (POST /users) ---
-    // try {
-    //   const response = await registerUser(userData); // Replace with your API call from services/usersApi.js
-    //   if (response) { // Check for successful response
-    //     alert('Registration successful! Please log in.');
-    //     navigate('/login'); // Redirect to login page
-    //   } else {
-    //     setError('Registration failed. Please try again.');
-    //   }
-    // } catch (err) {
-    //   setError(err.response?.data?.message || 'An error occurred during registration.'); // Show backend error if available
-    //   console.error("Registration error:", err);
-    // }
-    // --- End TODO ---
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-[#020617] relative overflow-hidden font-sans">
+            {/* Background Ambience */}
+            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-    // Simulate registration for now
-    if (username && email && password && location) {
-      alert("Simulating successful registration!");
-      navigate("/login"); // Redirect to login
-    } else {
-      setError("Please fill in all fields.");
-    }
-  };
+            <div className="max-w-md w-full relative z-10 px-6 animate-in fade-in zoom-in duration-500">
+                <div className="flex flex-col items-center mb-8">
+                    <div className="p-4 rounded-3xl bg-blue-600/10 border border-blue-500/20 mb-4 shadow-2xl">
+                        <ShieldPlus className="w-10 h-10 text-blue-500" />
+                    </div>
+                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">Create <span className="text-blue-500">Profile</span></h1>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-2 font-mono">Pulsora Network Enrollment</p>
+                </div>
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0d1a2e] px-4 py-8">
-      <div className="max-w-md w-full">
-        <PulsoraLogo />
-        <div className="bg-[#1e293b] shadow-xl rounded-lg p-8">
-          <h2 className="text-2xl font-semibold text-center text-gray-200 mb-6">
-            Create an Account
-          </h2>
-          {error && (
-            <p className="text-red-400 text-sm text-center mb-4">{error}</p>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Form Fields */}
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-400"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="mt-1 block w-full input-style"
-                placeholder="Choose a username"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-400"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 block w-full input-style"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-400"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 block w-full input-style"
-                placeholder="********"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-400"
-              >
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="mt-1 block w-full input-style"
-                placeholder="********"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium text-gray-400"
-              >
-                Location
-              </label>
-              <input
-                type="text"
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                required
-                className="mt-1 block w-full input-style"
-                placeholder="e.g., City, State"
-              />
-              {/* TODO: Use a better location input? Map / Autocomplete */}
-            </div>
+                <div className="bg-slate-900/60 backdrop-blur-2xl border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl">
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Username Input */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <UserPlus size={12} /> Assigned Username
+                            </label>
+                            <input
+                                className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl px-5 py-3.5 text-white text-sm outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+                                placeholder="e.g. Operator_01"
+                                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                                required
+                            />
+                        </div>
 
-            <div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2.5 px-4 btn-primary mt-2"
-              >
-                Register
-              </button>
+                        {/* Email Input */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <Mail size={12} /> Communication Channel
+                            </label>
+                            <input
+                                type="email"
+                                className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl px-5 py-3.5 text-white text-sm outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+                                placeholder="name@pulsora.sys"
+                                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                required
+                            />
+                        </div>
+
+                        {/* Password Input */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <Lock size={12} /> Access Passcode
+                            </label>
+                            <input
+                                type="password"
+                                className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl px-5 py-3.5 text-white text-sm outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+                                placeholder="••••••••"
+                                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                required
+                            />
+                        </div>
+
+                        <div className="pt-2">
+                            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl tracking-[0.2em] shadow-xl shadow-blue-600/30 transition-all active:scale-95 uppercase italic flex items-center justify-center gap-2 group">
+                                Authorize Enrollment <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t border-slate-800 text-center">
+                        <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">
+                            Already Enrolled? <Link to="/login" className="text-blue-500 hover:text-blue-400 transition-colors ml-1">Access Terminal</Link>
+                        </p>
+                    </div>
+                </div>
+
+                {/* System Footer Decoration */}
+                <div className="mt-8 flex justify-center gap-4 opacity-30">
+                    <div className="h-1 w-12 bg-slate-800 rounded-full"></div>
+                    <div className="h-1 w-4 bg-blue-600 rounded-full"></div>
+                    <div className="h-1 w-12 bg-slate-800 rounded-full"></div>
+                </div>
             </div>
-          </form>
-          <p className="mt-6 text-center text-sm text-gray-400">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-indigo-400 hover:text-indigo-300"
-            >
-              Login
-            </Link>
-          </p>
         </div>
-      </div>
-      {/* Scoped styles */}
-      <style jsx>{`
-        .input-style {
-          background-color: #334155;
-          border: 1px solid #475569;
-          color: white;
-          border-radius: 0.375rem;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-          padding: 0.6rem 0.75rem;
-          font-size: 0.875rem;
-        }
-        .input-style::placeholder {
-          color: #94a3b8;
-        }
-        .input-style:focus {
-          outline: none;
-          --tw-ring-color: #818cf8;
-          border-color: #818cf8;
-          box-shadow: 0 0 0 2px var(--tw-ring-color);
-        }
-        .btn-primary {
-          border: 1px solid transparent;
-          border-radius: 0.375rem;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-          font-size: 0.875rem;
-          font-weight: 500;
-          color: white;
-          background-color: #4338ca; /* Indigo 700 */
-        }
-        .btn-primary:hover {
-          background-color: #3730a3; /* Indigo 800 */
-        }
-      `}</style>
-    </div>
-  );
+    );
 }
-
-export default RegistrationPage;

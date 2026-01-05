@@ -22,7 +22,7 @@ services:
       context: ./Pulsora # Location of Pulsora/Dockerfile
     container_name: pulsora_backend
     ports:
-      - "8081:8081" # Expose backend API
+      - "8080:8080" # Expose backend API
     depends_on:
       - db # Ensures Postgres starts first
     # Volumes are crucial for hot-reloading in development

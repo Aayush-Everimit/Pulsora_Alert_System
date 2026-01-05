@@ -1,5 +1,4 @@
-import { Routes, Route } from "react-router-dom";
-// CORRECTED PATH: Check casing to match local file system
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./components/Layout/MainLayout";
 import DashboardPage from "./pages/DashboardPage";
 import AlertsNotificationsPage from "./pages/AlertsNotificationsPage";
@@ -8,38 +7,45 @@ import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import { useAuth } from "./context/AuthContext";
+import MyAlertsPage from "./pages/MyAlertsPage.jsx";
 
-// Simple check for authentication status (Replace with real logic later)
-const isAuthenticated = () => {
-  // TODO: Implement actual authentication check (e.g., check for stored JWT token)
-  return true; // Assuming logged in for layout testing
-};
+/**
+ * Logic Unchanged: Protects routes that require authentication
+ */
+function ProtectedLayout() {
+    const { user } = useAuth();
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return <MainLayout />;
+}
 
 function App() {
-  // Determine if the full layout (sidebar + header) should be shown
-  const showLayout = isAuthenticated();
+    return (
+        // Added a wrapper div to ensure the dark theme applies globally
+        <div className="bg-[#020617] min-h-screen">
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegistrationPage />} />
 
-  return (
-    <Routes>
-      {/* 1. Routes WITHOUT the main layout (Public Access: Login, Register) */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegistrationPage />} />
+                {/* Protected Routes */}
+                <Route element={<ProtectedLayout />}>
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/alerts" element={<AlertsNotificationsPage />} />
+                    <Route path="/my-alerts" element={<MyAlertsPage />} />
+                    <Route path="/reports" element={<ReportsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                </Route>
 
-      {/* 2. Routes WITH the main layout (Protected Access) */}
-      {/* RESTORED: This nested route renders MainLayout around the child paths */}
-      <Route element={showLayout ? <MainLayout /> : <LoginPage />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/alerts" element={<AlertsNotificationsPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        {/* Uncomment the line below if you create HelpPage.jsx */}
-        {/* <Route path="/help" element={<HelpPage />} /> */}
-      </Route>
-
-      {/* 3. Catch-all Not Found Route */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  );
+                {/* 404 */}
+                <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+        </div>
+    );
 }
 
 export default App;

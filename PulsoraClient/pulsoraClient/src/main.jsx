@@ -1,14 +1,19 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom"; // <-- NEW IMPORT
-import "./styles/index.css";
-import App from "./App.jsx";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import App from "./App";
+import "./styles/index.css"; // Ensure Tailwind is imported here
+//FOr Map
+import 'leaflet/dist/leaflet.css';
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    {/* This is the missing piece that creates the routing context */}
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+        <BrowserRouter>
+            <AuthProvider>
+                <App />
+            </AuthProvider>
+        </BrowserRouter>
+    </React.StrictMode>
 );

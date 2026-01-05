@@ -1,10 +1,19 @@
 import axios from "axios";
-const ApiBaseUrl = "/api";
+
 const apiClient = axios.create({
-  baseURL: ApiBaseUrl,
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL: "http://localhost:8080",
+    headers: {
+        "Content-Type": "application/json",
+    },
+    withCredentials: false, // ✅ IMPORTANT
+});
+
+apiClient.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 export default apiClient;

@@ -1,80 +1,80 @@
 package com.projects.Pulsora.Controller;
 
-import com.projects.Pulsora.Entity.Users;
+import com.projects.Pulsora.Entity.User;
 import com.projects.Pulsora.Service.UsersService;
-import com.projects.Pulsora.Utility.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/v1/users")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "https://marquerite-unprotecting-amber.ngrok-free.dev"
+})
+@RequiredArgsConstructor
 @Slf4j
-public class UsersController
-{
+public class UsersController {
+
     private final UsersService usersService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    public UsersController(UsersService usersService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.usersService = usersService;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = usersService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Users> getUserByEmail(@PathVariable String email)
-    {
-        return usersService.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
-        return usersService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-    @PostMapping("/users")
-    public ResponseEntity<Users> signUp(@RequestBody Users user) {
-        Users savedUser = usersService.createNewUser(user);
-        URI location = URI.create("/users/" + savedUser.getId());
-        return ResponseEntity.created(location).body(savedUser);
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<User> user = usersService.findById(id);
+        return user.<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("User not found with ID: " + id));
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Users user)
-    {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-            Optional<Users> users = usersService.findByEmail(user.getEmail());
-            if (users.isPresent())
-            {
-                jwtUtil.generateToken(user.getUsername());
-            }
-        }
-        catch (Exception e)
-        {
-            log.error("Exception occurred while trying to login using username and password", e);
-            return new ResponseEntity<>("Incorrect Username Or Password " , HttpStatus.BAD_REQUEST);
-        }
-        return null;
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        Optional<User> user = usersService.findByEmail(email);
+        return user.<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("User not found with email: " + email));
     }
 
-    @PutMapping("/users/{id}")
-    public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody Users user)
-    {
-        return usersService.updateExistingUser(id,user)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/location/{location}")
+    public ResponseEntity<List<User>> getUsersByLocation(@PathVariable String location) {
+        List<User> users = usersService.findByLocation(location);
+        return ResponseEntity.ok(users);
     }
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id)
-    {
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        Optional<User> updatedUser = usersService.updateExistingUser(id, user);
+        return updatedUser.<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("User not found for update with ID: " + id));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         return usersService.deleteUser(id);
     }
 
+    @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User savedUser = usersService.registerUser(user);
+        URI location = URI.create("/api/v1/users/" + savedUser.getId());
+        return ResponseEntity.created(location).body(savedUser);
+    }
 }

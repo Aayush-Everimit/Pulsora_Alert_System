@@ -1,183 +1,160 @@
-import React, { useState, useEffect } from "react";
-
-// TODO: Import API functions
-// import { getUserNotifications } from '../services/notificationsApi'; // Needs to be created
-// import { submitUserResponse } from '../services/responseApi'; // Needs to be created
-
-const placeholderNotifications = [
-  {
-    id: 1,
-    type: "INITIAL_CONFIRMATION",
-    eventId: 101,
-    eventType: "Earthquake",
-    location: "Delhi",
-    timeStamp: new Date(Date.now() - 3600000).toISOString(),
-    message: "Did you experience this event? Please respond.",
-    responded: false,
-  },
-  {
-    id: 2,
-    type: "GENERAL_GUIDELINE",
-    eventId: 101,
-    eventType: "Earthquake",
-    location: "Delhi",
-    timeStamp: new Date(Date.now() - 7200000).toISOString(),
-    message:
-      "General Safety Guidelines: Drop, Cover, and Hold On during aftershocks. Check for injuries and damage.",
-    responded: true,
-  }, // Not actionable
-  {
-    id: 3,
-    type: "INITIAL_CONFIRMATION",
-    eventId: 102,
-    eventType: "Flood",
-    location: "Mumbai",
-    timeStamp: new Date(Date.now() - 86400000).toISOString(),
-    message: "Did you experience this event? Please respond.",
-    responded: true,
-  }, // Already responded
-  {
-    id: 4,
-    type: "PERSONALIZED_GUIDANCE",
-    eventId: 102,
-    eventType: "Flood",
-    location: "Mumbai",
-    timeStamp: new Date(Date.now() - 86000000).toISOString(),
-    message:
-      "Personalized Guidance: Evacuation recommended for your area. Seek higher ground immediately.",
-    responded: false,
-  },
-];
+import React, { useEffect, useState } from "react";
+import apiClient from "../services/api";
+import { Bell, Check, Clock, ShieldAlert } from "lucide-react";
 
 function AlertsNotificationsPage() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [respondingId, setRespondingId] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [respondingId, setRespondingId] = useState(null);
 
-  useEffect(() => {
-    const loadNotifications = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        setNotifications(
-          placeholderNotifications.sort(
-            (a, b) => new Date(b.timeStamp) - new Date(a.timeStamp)
-          )
-        );
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-        setError("Failed to load notifications.");
-        setNotifications([]);
-      } finally {
-        setLoading(false);
-      }
+    const userId = localStorage.getItem("userId");
+
+    useEffect(() => {
+        if (!userId) return;
+
+        const loadAlerts = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const eventsRes = await apiClient.get("/api/v1/disaster-events");
+                const responsesRes = await apiClient.get("/user-responses");
+
+                const events = eventsRes.data || [];
+                const responses = (responsesRes.data || []).filter(
+                    (r) => r.user?.id === Number(userId)
+                );
+
+                const alerts = events.map((event) => {
+                    const userResponse = responses.find(
+                        (r) => r.disasterEvent?.id === event.id
+                    );
+
+                    return {
+                        id: event.id,
+                        type: "INITIAL_CONFIRMATION",
+                        eventId: event.id,
+                        eventType: event.eventType,
+                        location: event.location,
+                        timeStamp: event.timeStamp,
+                        message: "Did you experience this event? Please respond.",
+                        responded: Boolean(userResponse),
+                    };
+                });
+
+                alerts.sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp));
+                setNotifications(alerts);
+            } catch (err) {
+                console.error("Failed to load alerts:", err);
+                setError("Failed to load alerts.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadAlerts();
+    }, [userId]);
+
+    const handleResponse = async (notificationId, eventId, responseType) => {
+        setRespondingId(notificationId);
+        try {
+            await apiClient.post("/user-responses", {
+                user: { id: Number(userId) },
+                disasterEvent: { id: eventId },
+                response: responseType,
+            });
+
+            setNotifications((prev) =>
+                prev.map((n) =>
+                    n.id === notificationId ? { ...n, responded: true } : n
+                )
+            );
+        } catch (err) {
+            console.error("Failed to submit response:", err);
+            alert("Failed to submit response. Try again.");
+        } finally {
+            setRespondingId(null);
+        }
     };
-    loadNotifications();
-  }, []);
 
-  const handleResponse = async (notificationId, eventId, responseType) => {
-    setRespondingId(notificationId);
-    console.log(
-      `Responding to notification ${notificationId} for event ${eventId} with: ${responseType}`
-    );
-    try {
-      // TODO: Call API: await submitUserResponse({ userId: /* get from auth */, disasterEventId: eventId, response: responseType })
-      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API call
+    const getBorderColor = (type) => {
+        if (type === "INITIAL_CONFIRMATION") return "border-blue-500";
+        if (type === "PERSONALIZED_GUIDANCE") return "border-purple-500";
+        return "border-slate-700";
+    };
 
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notificationId ? { ...n, responded: true } : n
-        )
-      );
-    } catch (err) {
-      console.error("Failed to submit response:", err);
-    } finally {
-      setRespondingId(null);
-    }
-  };
+    return (
+        <div className="max-w-4xl animate-in fade-in duration-700">
+            <div className="mb-10">
+                <h1 className="text-4xl font-black text-white tracking-tight uppercase italic flex items-center gap-3">
+                    <Bell className="text-blue-500" /> Notifications
+                </h1>
+                <p className="text-slate-500 font-mono text-xs mt-2 uppercase tracking-[0.2em]">Incoming Transmissions & Requests</p>
+            </div>
 
-  const getBorderColor = (type) => {
-    if (type === "INITIAL_CONFIRMATION") return "border-yellow-500";
-    if (type === "PERSONALIZED_GUIDANCE") return "border-blue-500";
-    return "border-gray-600";
-  };
+            {loading && <div className="p-12 text-center text-slate-500 font-mono animate-pulse uppercase tracking-widest">Scanning Channel...</div>}
+            {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl font-mono text-sm">{error}</div>}
 
-  return (
-    <div className="text-gray-200">
-      <h1 className="text-3xl font-bold mb-6">Your Alerts & Notifications</h1>
+            {!loading && !error && (
+                <div className="space-y-4">
+                    {notifications.length === 0 ? (
+                        <p className="text-slate-500 font-mono text-sm italic">Transmission log empty.</p>
+                    ) : (
+                        notifications.map((notif) => (
+                            <div
+                                key={notif.id}
+                                className={`bg-slate-900/40 backdrop-blur-sm p-6 rounded-2xl border-l-4 shadow-xl transition-all ${getBorderColor(notif.type)} ${notif.responded ? 'opacity-50' : ''}`}
+                            >
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">
+                                                {notif.eventType} Detection
+                                            </h2>
+                                            {!notif.responded && <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>}
+                                        </div>
+                                        <p className="text-[11px] font-black text-blue-400 font-mono uppercase tracking-widest">{notif.location}</p>
+                                        <p className="text-sm text-slate-400 mt-3 leading-relaxed max-w-lg">
+                                            {notif.message}
+                                        </p>
+                                    </div>
+                                    <span className="text-[10px] font-mono font-bold text-slate-600 flex items-center gap-1">
+                                        <Clock size={12} /> {notif.timeStamp ? new Date(notif.timeStamp).toLocaleString() : ""}
+                                    </span>
+                                </div>
 
-      {loading && (
-        <p className="italic text-gray-400">Loading notifications...</p>
-      )}
-      {error && <p className="text-red-500">{error}</p>}
+                                {notif.type === "INITIAL_CONFIRMATION" && !notif.responded && (
+                                    <div className="mt-6 flex gap-3">
+                                        <button
+                                            onClick={() => handleResponse(notif.id, notif.eventId, "FELT")}
+                                            disabled={respondingId === notif.id}
+                                            className="px-6 py-2.5 rounded-xl text-xs font-black bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                                        >
+                                            {respondingId === notif.id ? "SYNCING..." : "CONFIRM: I FELT IT"}
+                                        </button>
+                                        <button
+                                            onClick={() => handleResponse(notif.id, notif.eventId, "NOT_FELT")}
+                                            disabled={respondingId === notif.id}
+                                            className="px-6 py-2.5 rounded-xl text-xs font-black bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all disabled:opacity-50"
+                                        >
+                                            {respondingId === notif.id ? "SYNCING..." : "NEGATIVE"}
+                                        </button>
+                                    </div>
+                                )}
 
-      {!loading && !error && (
-        <div className="space-y-4 max-w-2xl">
-          {notifications.length === 0 ? (
-            <p className="italic text-gray-500">
-              You have no new alerts or notifications.
-            </p>
-          ) : (
-            notifications.map((notif) => (
-              <div
-                key={notif.id}
-                className={`bg-[#1e293b] p-4 rounded-lg shadow-md border-l-4 ${getBorderColor(
-                  notif.type
-                )}`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">
-                      {notif.eventType} in {notif.location}
-                    </h2>
-                    <p className="text-sm text-gray-400">{notif.message}</p>
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0 ml-4 pt-1">
-                    {new Date(notif.timeStamp).toLocaleTimeString()} -{" "}
-                    {new Date(notif.timeStamp).toLocaleDateString()}
-                  </span>
+                                {notif.responded && (
+                                    <div className="mt-4 flex items-center gap-2 text-emerald-400 font-black text-[10px] uppercase tracking-widest italic">
+                                        <Check size={14} /> Response Acknowledged
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
                 </div>
-
-                {notif.type === "INITIAL_CONFIRMATION" && !notif.responded && (
-                  <div className="mt-4 flex space-x-3">
-                    <button
-                      onClick={() =>
-                        handleResponse(notif.id, notif.eventId, "FELT")
-                      }
-                      disabled={respondingId === notif.id}
-                      className="px-4 py-1.5 rounded text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {respondingId === notif.id
-                        ? "Sending..."
-                        : "Yes, I Felt It"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleResponse(notif.id, notif.eventId, "NOT_FELT")
-                      }
-                      disabled={respondingId === notif.id}
-                      className="px-4 py-1.5 rounded text-sm font-medium bg-gray-600 text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {respondingId === notif.id
-                        ? "Sending..."
-                        : "No, I Didn't Feel It"}
-                    </button>
-                  </div>
-                )}
-                {notif.type === "INITIAL_CONFIRMATION" && notif.responded && (
-                  <p className="mt-3 text-sm text-green-400 italic">
-                    ✓ Response Received
-                  </p>
-                )}
-              </div>
-            ))
-          )}
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default AlertsNotificationsPage;

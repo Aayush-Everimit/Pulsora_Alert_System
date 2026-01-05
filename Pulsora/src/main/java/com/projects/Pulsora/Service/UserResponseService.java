@@ -1,52 +1,52 @@
 package com.projects.Pulsora.Service;
 
+import com.projects.Pulsora.Entity.DisasterEvent;
+import com.projects.Pulsora.Entity.User;
 import com.projects.Pulsora.Entity.UserResponse;
-import com.projects.Pulsora.Repository.UserResponseRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import com.projects.Pulsora.Repository.DisasterEventRepository;
 
+import com.projects.Pulsora.Repository.UserResponseRepository;
+import com.projects.Pulsora.Repository.UsersRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class UserResponseService
-{
+@RequiredArgsConstructor
+public class UserResponseService {
+
+    private final UsersRepository userRepository;
+    private final DisasterEventRepository disasterEventRepository;
     private final UserResponseRepository userResponseRepository;
-    public UserResponseService(UserResponseRepository userResponseRepository)
-    {
-        this.userResponseRepository = userResponseRepository;
+
+    @Transactional
+    public UserResponse submitResponse(Long userId, Long disasterEventId, UserResponse.ResponseType responseType, String description) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        DisasterEvent event = disasterEventRepository.findById(disasterEventId)
+                .orElseThrow(() -> new RuntimeException("Disaster event not found"));
+
+        // Prevent duplicate response
+        if (userResponseRepository.existsByUserAndDisasterEvent(user, event)) {
+            throw new RuntimeException("Response already submitted for this event");
+        }
+
+        UserResponse response = new UserResponse();
+        response.setUser(user);                    // ✅ YOU MISSED THIS
+        response.setDisasterEvent(event);          // ✅ link disaster event
+        response.setResponse(responseType);        // enum type
+        response.setDescription(description);
+        response.setResponseTime(LocalDateTime.now());
+
+        return userResponseRepository.save(response);
+
     }
 
-    public List<UserResponse> getAllUserResponses() {
+    public List<UserResponse> getAllResponses() {
         return userResponseRepository.findAll();
     }
-
-    public Optional<UserResponse> getUserResponseById(Long id) {
-        return userResponseRepository.findById(id);
-    }
-
-    public UserResponse submitResponse(UserResponse userResponse) {
-        return userResponseRepository.save(userResponse);
-    }
-
-
-    public Optional<UserResponse> updateResponse(Long id, UserResponse userResponse) {
-        return userResponseRepository.findById(id).map(existingResponse -> {
-
-            existingResponse.setDisasterEvent(userResponse.getDisasterEvent());
-            existingResponse.setResponse(userResponse.getResponse());
-            return userResponseRepository.save(existingResponse);
-        });
-    }
-
-    public ResponseEntity<String> deleteResponse(Long id) {
-        if(userResponseRepository.existsById(id)) {
-        userResponseRepository.deleteById(id);
-            return ResponseEntity.ok("User deleted");
-        }
-        else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
-        }
 }

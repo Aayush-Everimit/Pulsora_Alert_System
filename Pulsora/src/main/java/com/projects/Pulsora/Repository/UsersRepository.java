@@ -1,12 +1,14 @@
 package com.projects.Pulsora.Repository;
 
-import com.projects.Pulsora.Entity.Users;
+import com.projects.Pulsora.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 import java.util.Optional;
+import java.util.List;
 
-public interface UsersRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByEmail(String email);
-    List<Users> findByLocationIgnoreCase(String Location);
+public interface UsersRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
+    boolean existsByEmail(String email);
+    List<User> findByLocationIgnoreCase(String location);
+
 }

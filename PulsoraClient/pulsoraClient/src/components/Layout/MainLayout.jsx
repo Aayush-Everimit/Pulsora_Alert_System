@@ -1,87 +1,97 @@
 import React from "react";
 import { NavLink, Outlet, Link } from "react-router-dom";
+import { LayoutDashboard, Bell, BarChart3, Settings, LogOut, ShieldAlert } from "lucide-react";
 import logoImage from "../../assets/pulsora_logo.jpg";
 import userImage from "../../assets/user.png";
+import { useAuth } from "../../context/AuthContext";
 
 const PulsoraLogo = () => (
-  <Link to="/" className="flex items-center space-x-2">
-    <img
-      src={logoImage}
-      alt="Pulsora Logo"
-      className="w-40 h-20 object-contain shrink-0"
-    />
-  </Link>
+    <Link to="/" className="flex items-center group transition-all duration-300">
+        <img
+            src={logoImage}
+            alt="Pulsora Logo"
+            className="w-32 h-14 object-contain filter brightness-110 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+        />
+    </Link>
 );
 
-// Placeholder User Avatar
-const UserAvatar = () => (
-  <button className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-    <img
-      class="w-10 h-10 p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
-      src={userImage}
-      alt="Bordered avatar"
-    />
-  </button>
-);
+const UserAvatar = () => {
+    const { user } = useAuth();
+    return (
+        <div className="flex items-center space-x-4 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 backdrop-blur-md">
+            <div className="text-right hidden sm:block">
+                <p className="text-xs font-bold text-white leading-none">{user?.username || "Operator"}</p>
+                <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-mono font-bold">Authenticated</p>
+            </div>
+            <div className="relative group">
+                <img
+                    className="w-9 h-9 rounded-full border-2 border-blue-500/50"
+                    src={userImage}
+                    alt="Avatar"
+                />
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+    );
+};
 
 function MainLayout() {
-  const navLinkClass = ({ isActive }) =>
-    `flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 ${
-      isActive ? "bg-gray-700 text-white shadow-inner" : ""
-    }`;
+    const { logout } = useAuth();
 
-  return (
-    // Outer container: Flex column, min-h-screen, dark background
-    <div className="flex min-h-screen w-full bg-gray-900 text-gray-200">
-      {/* Sidebar: Fixed width, high z-index, dark background, flex column for sticky nav*/}
-      <aside className="w-64 shrink-0 bg-[#111827] p-4 flex flex-col z-10 shadow-xl border-r border-gray-800">
-        {/* Logo Area */}
-        <div className="h-16 flex items-center justify-start shrink-0 mb-4">
-          <PulsoraLogo />
+    const navLinkClass = ({ isActive }) =>
+        `flex items-center px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 group ${
+            isActive
+                ? "text-blue-400 bg-blue-500/10 border-r-4 border-blue-500"
+                : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+        }`;
+
+    return (
+        <div className="flex h-screen w-full bg-[#020617] text-slate-200 font-sans">
+            {/* Sidebar */}
+            <aside className="w-72 shrink-0 bg-[#0f172a]/60 backdrop-blur-xl p-6 flex flex-col z-20 border-r border-slate-800/50 shadow-2xl">
+                <div className="mb-10 px-2">
+                    <PulsoraLogo />
+                </div>
+
+                <nav className="flex-grow space-y-2 font-mono">
+                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4 px-4">Monitoring</p>
+                    <NavLink to="/" end className={navLinkClass}><LayoutDashboard size={18} className="mr-3" /> Dashboard</NavLink>
+                    <NavLink to="/alerts" className={navLinkClass}><Bell size={18} className="mr-3" /> Live Alerts</NavLink>
+                    <NavLink to="/my-alerts" className={navLinkClass}><ShieldAlert size={18} className="mr-3" /> My Alerts</NavLink>
+                    <NavLink to="/reports" className={navLinkClass}><BarChart3 size={18} className="mr-3" /> Reports</NavLink>
+
+                    <div className="pt-6">
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4 px-4">System</p>
+                        <NavLink to="/settings" className={navLinkClass}><Settings size={18} className="mr-3" /> Settings</NavLink>
+                    </div>
+                </nav>
+
+                <div className="mt-auto pt-6 border-t border-slate-800/50">
+                    <button onClick={logout} className="flex w-full items-center px-4 py-3 text-sm font-bold text-slate-400 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all">
+                        <LogOut size={18} className="mr-3" /> Sign Out
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden">
+                <header className="h-20 bg-[#020617]/80 backdrop-blur-md px-8 flex justify-between items-center shrink-0 border-b border-slate-800/50 z-10">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-[10px] font-black text-slate-400 tracking-[0.2em] font-mono">STATUS: SYSTEM_NOMINAL</span>
+                    </div>
+                    <UserAvatar />
+                </header>
+
+                <main className="flex-grow overflow-y-auto p-8 relative">
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+                    <div className="relative z-10 max-w-7xl mx-auto">
+                        <Outlet />
+                    </div>
+                </main>
+            </div>
         </div>
-
-        {/* Navigation - Takes up available space */}
-        <nav className="flex-grow space-y-1">
-          <NavLink to="/" end className={navLinkClass}>
-            <span className="mr-3 w-5 text-center">📊</span> Dashboard
-          </NavLink>
-          <NavLink to="/alerts" className={navLinkClass}>
-            <span className="mr-3 w-5 text-center">🔔</span> Alerts
-          </NavLink>
-          <NavLink to="/reports" className={navLinkClass}>
-            <span className="mr-3 w-5 text-center">📈</span> Reports
-          </NavLink>
-          <NavLink to="/settings" className={navLinkClass}>
-            <span className="mr-3 w-5 text-center">⚙️</span> Settings
-          </NavLink>
-          {/* Add more links here */}
-        </nav>
-
-        {/* Optional Footer/User Area */}
-        <div className="mt-auto flex-shrink-0 pt-4 border-t border-gray-700">
-          {/* Example: User profile link */}
-        </div>
-      </aside>
-
-      {/* Main Content Wrapper: Takes remaining width, scrollable */}
-      <div className="flex-grow flex flex-col overflow-y-auto">
-        {/* Top Bar: Fixed position, flex-shrink-0 to prevent collapsing */}
-        <header className="bg-gray-800 shadow-lg p-4 flex justify-end items-center flex-shrink-0 border-b border-gray-700">
-          {/* Right side - User avatar, notifications icon, etc. */}
-          <div className="flex items-center space-x-4">
-            {/* Notifications placeholder */}
-            <UserAvatar />
-          </div>
-        </header>
-
-        {/* Page Content Area: Background applied here, full flex-grow */}
-        <main className="flex-grow p-6 bg-[#1F2937]">
-          {/* Outlet renders the matched child route component (e.g., DashboardPage) */}
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default MainLayout;
