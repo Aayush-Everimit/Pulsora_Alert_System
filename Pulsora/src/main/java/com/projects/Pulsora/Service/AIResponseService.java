@@ -1,11 +1,17 @@
 package com.projects.Pulsora.Service;
 
 import com.projects.Pulsora.Entity.*;
+import com.projects.Pulsora.Events.UserResponseSubmittedEvent;
 import com.projects.Pulsora.Repository.AIResponseRepository;
 import com.projects.Pulsora.Repository.UserResponseRepository;
+import com.projects.Pulsora.Repository.UsersRepository;
 import com.projects.Pulsora.Utility.GeminiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +26,7 @@ public class AIResponseService {
     private final AIResponseRepository aiResponseRepository;
     private final UserResponseRepository userResponseRepository;
     private final UsersService usersService;
+    private final UsersRepository userRepository;
     private final DisasterEventService disasterEventService;
     private final NotificationService notificationService;
     private final GeminiClient geminiClient;
@@ -62,6 +69,26 @@ public class AIResponseService {
         notificationService.sendFinalNotificationAfterAIAnalysis(saved);
 
         return toDto(saved);
+    }
+
+    /* =========================
+       EVENT LISTENER
+       ========================= */
+
+    @Async
+    @EventListener
+    public void handleUserResponseSubmitted(UserResponseSubmittedEvent event) {
+        log.info("📩 UserResponseSubmittedEvent received for userId={} eventId={}",
+                event.userId(), event.disasterEventId());
+        try {
+            // ✅ Safely trigger personalized AI analysis without circular dependency
+            generatePersonalizedAIAnalysis(event.disasterEventId(), event.userId());
+            log.info("✅ AI Response successfully generated for userId={} eventId={}",
+                    event.userId(), event.disasterEventId());
+        } catch (Exception e) {
+            log.error("❌ Failed to generate AI response for userId={} eventId={}: {}",
+                    event.userId(), event.disasterEventId(), e.getMessage(), e);
+        }
     }
 
     /* =========================
@@ -166,15 +193,38 @@ public class AIResponseService {
         return new ParsedAI(summary, actions);
     }
 
-    public List<AIResponse> getResponsesByUserId(Long userId)
-    {
+    /* =========================
+       PUBLIC GETTERS
+       ========================= */
+
+    public List<AIResponse> getResponsesByUserId(Long userId) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email;
+
+        if (principal instanceof org.springframework.security.core.userdetails.User) {
+            email = ((org.springframework.security.core.userdetails.User) principal).getUsername();
+        } else if (principal instanceof String) {
+            email = (String) principal; // sometimes JWT stores username directly
+        } else {
+            throw new IllegalStateException("Unexpected authentication principal type: " + principal.getClass());
+        }
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+        if (!currentUser.getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to view these responses");
+        }
         return aiResponseRepository.findByUserId(userId);
     }
 
-    public List<AIResponse> getResponsesByEventId(Long eventId)
-    {
+    public List<AIResponse> getResponsesByEventId(Long eventId) {
         return aiResponseRepository.findByDisasterEventId(eventId);
     }
+
+    /* =========================
+       INTERNAL HELPERS
+       ========================= */
 
     private record ParsedAI(String summary, String actions) {}
 
@@ -190,10 +240,6 @@ public class AIResponseService {
         """;
     }
 
-    /* =========================
-       DTO MAPPING
-       ========================= */
-
     private AIResponse_dto toDto(AIResponse ai) {
         DisasterEvent e = ai.getDisasterEvent();
 
@@ -208,6 +254,4 @@ public class AIResponseService {
                 ai.getCreatedAt()
         );
     }
-//    public List<AIResponse> getResponsesByUser(us) { return aiResponseRepository.findByUser(user); }
-//    public List<AIResponse> getResponsesByEvent(DisasterEvent event) { return aiResponseRepository.findByDisasterEvent(event); }
 }

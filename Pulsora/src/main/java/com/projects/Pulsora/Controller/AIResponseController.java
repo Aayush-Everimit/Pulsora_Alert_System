@@ -4,6 +4,7 @@ import com.projects.Pulsora.Entity.AIResponse_dto;
 import com.projects.Pulsora.Service.AIResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;@RestController
@@ -24,8 +25,9 @@ public class AIResponseController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<AIResponse> getByUser(@PathVariable Long userId) {
-        return aiResponseService.getResponsesByUserId(userId);
+    public ResponseEntity<List<AIResponse>> getByUser(@PathVariable Long userId, Authentication authentication) {
+        System.out.println("Authenticated user: " + authentication.getName());
+        return ResponseEntity.ok( aiResponseService.getResponsesByUserId(userId));
     }
 
     @GetMapping("/event/{eventId}")

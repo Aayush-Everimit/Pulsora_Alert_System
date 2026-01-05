@@ -1,61 +1,205 @@
 import React, { useEffect, useState } from "react";
-import { getAIResponsesByUser } from "../services/aiResponseApi";
+import apiClient from "../services/api";
+import { Check, Loader2 } from "lucide-react";
 
 function MyAlertsPage() {
     const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [respondingId, setRespondingId] = useState(null);
     const userId = localStorage.getItem("userId");
 
     useEffect(() => {
+        if (!userId) return;
+
         const loadAlerts = async () => {
-            const data = await getAIResponsesByUser(userId);
-            setAlerts(data);
+            try {
+                setLoading(true);
+
+                const [eventsRes, responsesRes, aiRes] = await Promise.all([
+                    apiClient.get("/api/v1/disaster-events"),
+                    apiClient.get("/api/v1/user-responses"),
+                    apiClient.get(`/api/v1/ai-responses/user/${userId}`)
+                ]);
+
+                const events = eventsRes.data || [];
+                const responses = responsesRes.data || [];
+                const aiResponses = aiRes.data || [];
+
+                const combined = events.map((event) => {
+                    const userResponse = responses.find(
+                        (r) =>
+                            r.user?.id === Number(userId) &&
+                            r.disasterEvent?.id === event.id
+                    );
+
+                    const aiResponse = aiResponses.find(
+                        (a) => a.disasterEvent?.id === event.id
+                    );
+
+                    return {
+                        id: event.id,
+                        eventType: event.eventType,
+                        location: event.location,
+                        severity: event.severity,
+                        timestamp: event.timeStamp,
+                        userResponse,
+                        aiResponse,
+                    };
+                });
+
+                setAlerts(combined);
+            } catch (err) {
+                console.error("❌ Failed to load alerts:", err);
+            } finally {
+                setLoading(false);
+            }
         };
+
         loadAlerts();
     }, [userId]);
+
+    // ✅ Handle user response (FELT / NOT_FELT)
+    // ✅ Submit user response
+    const handleResponse = async (eventId, responseType) => {
+        setRespondingId(eventId);
+        try {
+            // Step 1️⃣ — Submit the user response
+            await apiClient.post("/api/v1/user-responses", {
+                userId: Number(userId),
+                disasterEventId: eventId,
+                responseType,
+                description: "",
+            });
+
+            // Step 2️⃣ — Poll for AI response (2 tries, 3-second interval)
+            let aiResponse = null;
+            for (let i = 0; i < 2; i++) {
+                const aiRes = await apiClient.get(`/api/v1/ai-responses/user/${userId}`);
+                const found = aiRes.data?.find(
+                    (r) => r.disasterEvent?.id === eventId
+                );
+                if (found) {
+                    aiResponse = found;
+                    break;
+                }
+                // Wait 3 seconds before next try
+                await new Promise((res) => setTimeout(res, 3000));
+            }
+
+            // Step 3️⃣ — Update UI with response + AI data
+            setAlerts((prev) =>
+                prev.map((a) =>
+                    a.id === eventId
+                        ? {
+                            ...a,
+                            userResponse: { response: responseType },
+                            aiResponse,
+                        }
+                        : a
+                )
+            );
+        } catch (err) {
+            console.error("Failed to submit response:", err);
+            alert("Failed to submit response. Try again.");
+        } finally {
+            setRespondingId(null);
+        }
+    };
+
+
+    if (loading)
+        return (
+            <div className="text-center text-slate-400 mt-20">
+                <Loader2 className="animate-spin inline mr-2" />
+                Loading Alerts...
+            </div>
+        );
 
     return (
         <div className="text-gray-200">
             <h1 className="text-3xl font-bold mb-6">My Alerts</h1>
 
             {alerts.length === 0 && (
-                <p className="italic text-gray-400">No AI alerts yet.</p>
+                <p className="italic text-gray-400">No disaster events yet.</p>
             )}
 
             <div className="space-y-6 max-w-3xl">
                 {alerts.map((alert) => (
                     <div
                         key={alert.id}
-                        className="bg-slate-800 p-5 rounded-xl border-l-4 border-blue-500"
+                        className="bg-slate-800 p-6 rounded-xl border-l-4 border-blue-500 shadow-lg"
                     >
                         <h2 className="text-lg font-bold text-white">
-                            {alert.disasterEvent.eventType} — {alert.disasterEvent.location}
+                            {alert.eventType} — {alert.location}
                         </h2>
-
                         <p className="text-sm text-gray-400 mt-1">
-                            Severity: {alert.disasterEvent.severity}
+                            Severity: {alert.severity}
                         </p>
 
-                        <div className="mt-4">
-                            <p className="text-sm text-blue-400 font-semibold">
-                                AI Situation Summary
-                            </p>
-                            <p className="text-sm mt-1 text-gray-300">
-                                {alert.aggregateSummary}
-                            </p>
-                        </div>
+                        {/* Case 1️⃣: Not responded yet */}
+                        {!alert.userResponse && (
+                            <div className="mt-4">
+                                <p className="text-sm text-blue-400 font-semibold">
+                                    Did you experience this event?
+                                </p>
+                                <div className="flex gap-3 mt-3">
+                                    <button
+                                        onClick={() => handleResponse(alert.id, "FELT")}
+                                        disabled={respondingId === alert.id}
+                                        className="px-5 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-500 transition disabled:opacity-50"
+                                    >
+                                        {respondingId === alert.id ? "Submitting..." : "I FELT IT"}
+                                    </button>
+                                    <button
+                                        onClick={() => handleResponse(alert.id, "NOT_FELT")}
+                                        disabled={respondingId === alert.id}
+                                        className="px-5 py-2 text-xs font-bold rounded-lg bg-slate-700 hover:bg-slate-600 transition disabled:opacity-50"
+                                    >
+                                        {respondingId === alert.id ? "Submitting..." : "I DID NOT FEEL IT"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
-                        <div className="mt-4">
-                            <p className="text-sm text-green-400 font-semibold">
-                                Recommended Action
-                            </p>
-                            <p className="text-sm mt-1 text-gray-300">
-                                {alert.recommendedAction}
-                            </p>
-                        </div>
+                        {/* Case 2️⃣: Responded + AI response available */}
+                        {alert.userResponse && alert.aiResponse && (
+                            <div className="mt-4">
+                                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
+                                    <Check size={16} /> Response acknowledged —{" "}
+                                    {alert.userResponse.responseType}
+                                </div>
 
-                        <p className="mt-3 text-xs text-gray-500">
-                            Generated at {new Date(alert.createdAt).toLocaleString()}
-                        </p>
+                                <div className="mt-2">
+                                    <p className="text-sm text-blue-400 font-semibold">
+                                        AI Situation Summary
+                                    </p>
+                                    <p className="text-sm mt-1 text-gray-300">
+                                        {alert.aiResponse.aggregateSummary || "No summary available."}
+                                    </p>
+                                </div>
+
+                                <div className="mt-3">
+                                    <p className="text-sm text-green-400 font-semibold">
+                                        Recommended Action
+                                    </p>
+                                    <p className="text-sm mt-1 text-gray-300 whitespace-pre-line">
+                                        {alert.aiResponse.recommendedAction || "No recommendation yet."}
+                                    </p>
+                                </div>
+
+                                <p className="mt-3 text-xs text-gray-500">
+                                    Generated at{" "}
+                                    {new Date(alert.aiResponse.createdAt).toLocaleString()}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Case 3️⃣: Responded but AI not ready yet */}
+                        {alert.userResponse && !alert.aiResponse && (
+                            <div className="mt-4 text-slate-400 text-sm italic">
+                                Response recorded — waiting for AI analysis...
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
