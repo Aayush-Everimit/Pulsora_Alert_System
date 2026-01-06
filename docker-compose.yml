@@ -1,51 +1,94 @@
-version: '3.8'
-
 services:
-  # 1. POSTGRESQL DATABASE SERVICE (The permanent solution)
+  # 🐘 PostgreSQL Database
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: pulsora_db
     restart: always
     environment:
-      # Use the credentials defined in your application.properties
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Aayush@2006
       POSTGRES_DB: pulsora_db
-    ports:
-      - "5432:5432" # Allows optional access from your host, e.g., for pgAdmin
     volumes:
-      - db_data:/var/lib/postgresql/data # Volume to persist data on your host machine
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # 2. SPRING BOOT BACKEND SERVICE (Pulsora)
+  # 💡 Spring Boot Backend
   backend:
     build:
-      context: ./Pulsora # Location of Pulsora/Dockerfile
+      context: ./Pulsora
+      dockerfile: Dockerfile
     container_name: pulsora_backend
-    ports:
-      - "8080:8080" # Expose backend API
+    restart: always
     depends_on:
-      - db # Ensures Postgres starts first
-    # Volumes are crucial for hot-reloading in development
+      db:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pulsora_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Aayush@2006
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+    # ✅ Keeps maven dependencies cached between builds
     volumes:
-      - ./Pulsora:/app        # Mounts source code for live changes/recompile
-      - ~/.m2:/root/.m2      # Caches Maven dependencies locally
-    # Runs the application, overriding default Dockerfile ENTRYPOINT
-    command: ./mvnw spring-boot:run
+      - ~/.m2:/root/.m2
+    # ✅ Ensures we run the built JAR instead of source overwriting
+    command: ["java", "-jar", "app.jar"]
 
-  # 3. VITE/REACT FRONTEND SERVICE (PulsoraClient)
+  # 🖥️ React/Vite Frontend
   frontend:
     build:
-      context: ./PulsoraClient # Location of PulsoraClient/Dockerfile
+      context: ./PulsoraClient
+      dockerfile: Dockerfile
     container_name: pulsora_frontend
-    ports:
-      - "5175:5175" # Expose Vite dev server
+    restart: always
     depends_on:
       - backend
-    # Volumes for hot-reloading:
+    ports:
+      - "5175:5175"
+    working_dir: /app/pulsoraClient
     volumes:
-      - ./PulsoraClient:/app
-      - /app/node_modules # Avoids container's node_modules being overwritten by host
+      - ./PulsoraClient/pulsoraClient:/app/pulsoraClient
+      - /app/pulsoraClient/node_modules
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
 
-### Define the Volumes
+  # 📬 MailHog - email testing UI
+  mailhog:
+    image: mailhog/mailhog
+    container_name: pulsora_mailhog
+    restart: always
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+  # 🧠 pgAdmin - PostgreSQL Management UI
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pulsora_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pulsora.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
 volumes:
-  db_data: # Volume definition for PostgreSQL data persistence
+  db_data:
+  pgadmin_data:

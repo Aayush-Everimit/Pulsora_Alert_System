@@ -1,13 +1,19 @@
 # PulsoraClient/Dockerfile
 
 FROM node:20-alpine
-WORKDIR /app
+WORKDIR /app/pulsoraClient
 
-COPY package*.json ./
+# Copy package files first (from the nested folder)
+COPY pulsoraClient/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-COPY . .
+# Copy the rest of the app
+COPY pulsoraClient .
 
+# Expose Vite dev port
 EXPOSE 5175
 
-CMD ["npm", "run", "dev"]
+# Run Vite in dev mode
+CMD ["npm", "run", "dev", "--", "--host"]
