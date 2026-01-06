@@ -43,4 +43,15 @@ public class UserResponseController {
     public ResponseEntity<List<UserResponse>> getAllResponses() {
         return ResponseEntity.ok(userResponseService.getAllResponses());
     }
+
+    @GetMapping("/count/felt/{eventId}")
+    public ResponseEntity<Long> countFeltResponses(@PathVariable("eventId") Long eventId) {
+        return ResponseEntity.ok( userResponseService.getResponseCount(eventId));
+    }
+
+    @GetMapping("/count/user/{userId}")
+    public ResponseEntity<Long> countResponsesByUser(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok( userResponseService.getResponseCountByUserId(userId));
+    }
+
 }

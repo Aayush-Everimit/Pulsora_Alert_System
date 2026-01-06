@@ -59,8 +59,13 @@ function DashboardPage() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const username = "Aayush";
+    const getStoredUsername = () => {
+        const raw = localStorage.getItem("username");
+        if (!raw || raw === "undefined" || raw === "null") return "User";
+        return raw;
+    };
 
+    const [username] = useState(getStoredUsername());
     useEffect(() => {
         const fetchEvents = async () => {
             setLoading(true);

@@ -52,4 +52,12 @@ public class UserResponseService {
     public List<UserResponse> getAllResponses() {
         return userResponseRepository.findAll();
     }
+
+    public long getResponseCount(Long eventId) {
+        return userResponseRepository.countTotalResponsesByEventId(eventId);
+    }
+
+    public long getResponseCountByUserId(Long userId) {
+        return userResponseRepository.countTotalResponsesByUserId(userId);
+    }
 }

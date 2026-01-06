@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DisasterEventRepository extends JpaRepository<DisasterEvent, Long> {
+    boolean existsByExternalId(String externalId);
 }
