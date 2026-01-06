@@ -1,8 +1,8 @@
 package com.projects.Pulsora.Service;
 
+import com.projects.Pulsora.Entity.AIResponse;
 import com.projects.Pulsora.Entity.DisasterEvent;
 import com.projects.Pulsora.Entity.User;
-import com.projects.Pulsora.Entity.AIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.List;
 public class NotificationService {
 
     private final UsersService usersService;
-
+    private final EmailNotificationService emailNotificationService;
 
     public void sendInitialNotificationToUsers(DisasterEvent event) {
         if (event == null || event.getLocation() == null) {
@@ -36,9 +36,11 @@ public class NotificationService {
                 event.getEventType(), usersInProximity.size(), targetLocation);
 
         for (User user : usersInProximity) {
-            // Actual SEND logic
+            emailNotificationService.sendEmail(user, event);
+
             log.info("🚨 [Notification-I] Sent to {} ({}) | Event: {} | Severity: {} | Time: {}",
-                    user.getUsername(), user.getEmail(), event.getEventType(), event.getSeverity(), LocalDateTime.now());
+                    user.getUsername(), user.getEmail(), event.getEventType(),
+                    event.getSeverity(), LocalDateTime.now());
         }
 
         log.info("Notification-I successfully dispatched for event: {}", event.getId());
@@ -62,6 +64,8 @@ public class NotificationService {
                 event.getEventType(), usersInProximity.size());
 
         for (User user : usersInProximity) {
+            emailNotificationService.sendAIRecommendationEmail(user, aiResponse);
+
             log.info("[Notification-II] Sent to {} ({}) | Recommendation: {}",
                     user.getUsername(), user.getEmail(), aiResponse.getRecommendedAction());
         }
