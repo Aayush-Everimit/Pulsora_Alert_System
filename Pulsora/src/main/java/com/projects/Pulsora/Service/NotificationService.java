@@ -38,7 +38,7 @@ public class NotificationService {
         for (User user : usersInProximity) {
             emailNotificationService.sendEmail(user, event);
 
-            log.info("🚨 [Notification-I] Sent to {} ({}) | Event: {} | Severity: {} | Time: {}",
+            log.info(" [Notification-I] Sent to {} ({}) | Event: {} | Severity: {} | Time: {}",
                     user.getUsername(), user.getEmail(), event.getEventType(),
                     event.getSeverity(), LocalDateTime.now());
         }

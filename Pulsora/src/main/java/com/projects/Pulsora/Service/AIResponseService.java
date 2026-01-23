@@ -74,12 +74,11 @@ public class AIResponseService {
         log.info("📩 UserResponseSubmittedEvent received for userId={} eventId={}",
                 event.userId(), event.disasterEventId());
         try {
-            // ✅ Safely trigger personalized AI analysis without circular dependency
             generatePersonalizedAIAnalysis(event.disasterEventId(), event.userId());
-            log.info("✅ AI Response successfully generated for userId={} eventId={}",
+            log.info("AI Response successfully generated for userId={} eventId={}",
                     event.userId(), event.disasterEventId());
         } catch (Exception e) {
-            log.error("❌ Failed to generate AI response for userId={} eventId={}: {}",
+            log.error("Failed to generate AI response for userId={} eventId={}: {}",
                     event.userId(), event.disasterEventId(), e.getMessage(), e);
         }
     }
@@ -202,6 +201,7 @@ public class AIResponseService {
         return aiResponseRepository.findByDisasterEventId(eventId);
     }
 
+    @Transactional(readOnly = true)
     public AIResponse_dto getOrGenerateResponse(Long userId, Long eventId)
     {
         User user = usersService.findById(userId).orElseThrow(() -> new RuntimeException("UserNotFound"));
@@ -235,6 +235,10 @@ public class AIResponseService {
     private AIResponse_dto toDto(AIResponse ai) {
         DisasterEvent e = ai.getDisasterEvent();
 
+        if (e == null) {
+            throw new IllegalStateException("DisasterEvent not initialized for AIResponse id=" + ai.getId());
+        }
+
         return new AIResponse_dto(
                 ai.getId(),
                 e.getId(),
@@ -246,4 +250,5 @@ public class AIResponseService {
                 ai.getCreatedAt()
         );
     }
+
 }

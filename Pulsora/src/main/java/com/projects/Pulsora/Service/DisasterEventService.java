@@ -83,7 +83,7 @@ public class DisasterEventService {
         event.setLongitude(dto.getLongitude());
 
         DisasterEvent saved = disasterEventRepository.save(event);
-        log.info("✅ Created new auto-generated disaster event: {} [{}]", saved.getEventType(), saved.getExternalId());
+        log.info("Created new auto-generated disaster event: {} [{}]", saved.getEventType(), saved.getExternalId());
         return saved;
     }
 

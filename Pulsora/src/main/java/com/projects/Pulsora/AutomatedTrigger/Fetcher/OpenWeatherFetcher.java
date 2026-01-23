@@ -36,7 +36,7 @@ public class OpenWeatherFetcher {
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
             if (response == null || !response.containsKey("alerts")) {
-                log.info("ℹ️ No active weather alerts for location.");
+                log.info("No active weather alerts for location.");
                 return events;
             }
 
@@ -65,9 +65,9 @@ public class OpenWeatherFetcher {
                         .build());
             }
 
-            log.info("✅ OpenWeatherFetcher fetched {} active weather alerts.", events.size());
+            log.info(" OpenWeatherFetcher fetched {} active weather alerts.", events.size());
         } catch (Exception e) {
-            log.error("❌ Failed to fetch from OpenWeather: {}", e.getMessage());
+            log.error(" Failed to fetch from OpenWeather: {}", e.getMessage());
         }
 
         return events;

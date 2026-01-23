@@ -15,7 +15,7 @@ function MyAlertsPage() {
             try {
                 setLoading(true);
 
-                // Fetch events, user responses, and AI responses
+
                 const [eventsRes, responsesRes, aiRes] = await Promise.all([
                     apiClient.get("/api/v1/disaster-events"),
                     apiClient.get("/api/v1/user-responses"),
@@ -26,7 +26,7 @@ function MyAlertsPage() {
                 const responses = responsesRes.data || [];
                 const aiResponses = aiRes.data || [];
 
-                // Combine data correctly
+
                 const combined = events.map((event) => {
                     const userResponse = responses.find(
                         (r) =>
@@ -34,7 +34,7 @@ function MyAlertsPage() {
                             r.disasterEvent?.id === event.id
                     );
 
-                    // ✅ Use eventId instead of disasterEvent.id
+
                     const aiResponse = aiResponses.find(
                         (a) => a.eventId === event.id
                     );
@@ -64,7 +64,7 @@ function MyAlertsPage() {
     const handleResponse = async (eventId, responseType) => {
         setRespondingId(eventId);
         try {
-            // Step 1️⃣ — Submit user response
+
             await apiClient.post("/api/v1/user-responses", {
                 userId: Number(userId),
                 disasterEventId: eventId,
@@ -72,16 +72,16 @@ function MyAlertsPage() {
                 description: "",
             });
 
-            // Step 2️⃣ — Wait 5 seconds (allow Gemini + DB to complete)
+
             await new Promise((res) => setTimeout(res, 5000));
 
-            // Step 3️⃣ — Fetch AI response (auto-generates if missing)
+
             const aiRes = await apiClient.get(
                 `/api/v1/ai-responses/user/${userId}/event/${eventId}`
             );
             const aiResponse = aiRes.data || null;
 
-            // Step 4️⃣ — Update UI
+
             setAlerts((prev) =>
                 prev.map((a) =>
                     a.id === eventId
@@ -131,7 +131,7 @@ function MyAlertsPage() {
                             Severity: {alert.severity}
                         </p>
 
-                        {/* Case 1️⃣: Not responded yet */}
+
                         {!alert.userResponse && (
                             <div className="mt-4">
                                 <p className="text-sm text-blue-400 font-semibold">
@@ -160,7 +160,7 @@ function MyAlertsPage() {
                             </div>
                         )}
 
-                        {/* Case 2️⃣: Responded + AI response available */}
+
                         {alert.userResponse && alert.aiResponse && (
                             <div className="mt-4">
                                 <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
@@ -195,7 +195,7 @@ function MyAlertsPage() {
                             </div>
                         )}
 
-                        {/* Case 3️⃣: Responded but AI not ready yet */}
+
                         {alert.userResponse && !alert.aiResponse && (
                             <div className="mt-4 text-slate-400 text-sm italic">
                                 Response recorded — waiting for AI analysis...

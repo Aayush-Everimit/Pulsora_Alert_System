@@ -10,10 +10,10 @@ export const fetchHeatMapData = async () => {
                 Authorization: `Bearer ${token}`,
             },
         });
-        // Ensure we always return an array
+
         return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error("Heatmap API Error:", error);
-        return []; // Return empty array so .map() doesn't break
+        return [];
     }
 };

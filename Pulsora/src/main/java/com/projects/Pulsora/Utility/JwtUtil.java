@@ -17,9 +17,11 @@ public class JwtUtil {
             "aVerySecureAndLongSecretKeyThatIsAtLeast32BytesLong";
 
     private static final long EXPIRATION_TIME =
-            1000 * 60 * 60;
+            1000 * 60 * 60
+            ;
 
     private SecretKey getSigningKey() {
+
         return Keys.hmacShaKeyFor(
                 SECRET.getBytes(StandardCharsets.UTF_8)
         );

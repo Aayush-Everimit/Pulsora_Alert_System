@@ -18,7 +18,7 @@ function AlertsNotificationsPage() {
             setError(null);
 
             try {
-                // ✅ Correct backend endpoints
+
                 const eventsRes = await apiClient.get("/api/v1/disaster-events");
                 const responsesRes = await apiClient.get("/api/v1/user-responses");
 
@@ -27,7 +27,7 @@ function AlertsNotificationsPage() {
                     (r) => r.user?.id === Number(userId)
                 );
 
-                // Build list of alerts for display
+
                 const alerts = events.map((event) => {
                     const userResponse = responses.find(
                         (r) => r.disasterEvent?.id === event.id
@@ -58,7 +58,7 @@ function AlertsNotificationsPage() {
         loadAlerts();
     }, [userId]);
 
-    // ✅ Corrected payload format for your DTO
+
     const handleResponse = async (notificationId, eventId, responseType) => {
         setRespondingId(notificationId);
         try {

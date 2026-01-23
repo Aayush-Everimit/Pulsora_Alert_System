@@ -7,7 +7,7 @@ export default function RegistrationPage() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    // 🔐 LOGIC PRESERVED: Exactly as provided
+
     const [form, setForm] = useState({
         username: "",
         email: "",
@@ -27,7 +27,7 @@ export default function RegistrationPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#020617] relative overflow-hidden font-sans">
-            {/* Background Ambience */}
+
             <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -55,7 +55,7 @@ export default function RegistrationPage() {
                             />
                         </div>
 
-                        {/* Email Input */}
+
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                 <Mail size={12} /> Communication Channel
@@ -68,8 +68,6 @@ export default function RegistrationPage() {
                                 required
                             />
                         </div>
-
-                        {/* Password Input */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                                 <Lock size={12} /> Access Passcode
@@ -97,7 +95,7 @@ export default function RegistrationPage() {
                     </div>
                 </div>
 
-                {/* System Footer Decoration */}
+
                 <div className="mt-8 flex justify-center gap-4 opacity-30">
                     <div className="h-1 w-12 bg-slate-800 rounded-full"></div>
                     <div className="h-1 w-4 bg-blue-600 rounded-full"></div>

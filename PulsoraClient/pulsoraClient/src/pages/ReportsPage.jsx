@@ -83,7 +83,7 @@ function ReportsPage() {
                 }
                 setTotalResponses(total);
 
-                // 👤 Get user's total response count
+
                 if (userId) {
                     const yourRes = await apiClient.get(
                         `/api/v1/user-responses/count/user/${userId}`

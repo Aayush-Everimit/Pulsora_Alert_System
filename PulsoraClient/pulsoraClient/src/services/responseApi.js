@@ -3,8 +3,8 @@ import apiClient from "./api";
 export const submitUserResponse = async (userId, eventId, responseType, description = "") => {
     const payload = {
         userId,
-        disasterEventId: eventId, // ✅ matches your DTO field name
-        responseType,             // ✅ matches DTO field name
+        disasterEventId: eventId,
+        responseType,
         description,
     };
 

@@ -76,7 +76,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // IMPORTANT: this must match JWT subject
+        return email;
     }
 
     @Override
